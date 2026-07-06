@@ -117,3 +117,4 @@ tests above indicate it does not reflect a real labor market sample. Treat any
 descriptive pattern here (e.g. "DevOps roles show the highest average risk score") as an
 artifact of this specific simulated dataset, not a real-world claim about AI's impact on
 employment.
+
