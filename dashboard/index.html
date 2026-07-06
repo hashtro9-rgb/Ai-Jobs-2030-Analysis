@@ -3,136 +3,168 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Impact on Jobs by 2030 — Interactive Dashboard</title>
+<title>AI Impact on Jobs 2030 — Report</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#0f1720; --panel:#182430; --panel2:#1e2d3b; --line:#2b3d4d;
-    --ink:#e7eef5; --muted:#93a4b3; --accent:#4aa3df; --accent2:#c0504d;
-    --good:#4caf7d; --warn:#e0a54a; --bad:#d9635b;
+    --canvas:#f3f2f1;      /* Power BI report canvas gray */
+    --tile:#ffffff;
+    --line:#e1dfdd;
+    --ink:#252423;
+    --muted:#605e5c;
+    --appbar:#faf9f8;
+    --accent:#118DFF;      /* Power BI default data color 1 */
+    --accent2:#12239E;
+    --gold:#F2C811;        /* Power BI yellow */
+    --shadow:0 1.6px 3.6px rgba(0,0,0,.08),0 .3px .9px rgba(0,0,0,.06);
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-       background:var(--bg);color:var(--ink);line-height:1.5}
-  .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
-  header h1{margin:0 0 6px;font-size:26px;letter-spacing:.2px}
-  header p{margin:0;color:var(--muted);font-size:15px}
-  .callout{margin:20px 0;padding:14px 16px;border-left:4px solid var(--warn);
-           background:rgba(224,165,74,.08);border-radius:6px;font-size:14px;color:#e9d7b6}
-  .callout b{color:#f2e2c2}
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:22px 0}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
-  .card .v{font-size:26px;font-weight:700}
-  .card .l{color:var(--muted);font-size:13px;margin-top:3px}
-  .filters{display:flex;flex-wrap:wrap;gap:14px;align-items:end;background:var(--panel);
-           border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:22px}
-  .filters .f{display:flex;flex-direction:column;gap:5px}
-  .filters label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-  select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:7px;
-         padding:8px 11px;font-size:14px;min-width:170px}
-  button.reset{background:transparent;color:var(--accent);border:1px solid var(--accent);
-               border-radius:7px;padding:9px 14px;cursor:pointer;font-size:13px}
-  button.reset:hover{background:rgba(74,163,223,.12)}
-  .count{margin-left:auto;color:var(--muted);font-size:13px;align-self:center}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-  .chart{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
-  .chart h3{margin:0 0 4px;font-size:15px}
-  .chart p{margin:0 0 12px;color:var(--muted);font-size:12.5px}
-  .chart.tall canvas{max-height:420px}
-  .chart canvas{max-height:300px}
-  .span2{grid-column:1 / -1}
-  footer{margin-top:32px;color:var(--muted);font-size:12.5px;text-align:center;line-height:1.7}
-  footer a{color:var(--accent);text-decoration:none}
-  @media(max-width:840px){.grid{grid-template-columns:1fr}.span2{grid-column:auto}}
+  html,body{height:100%;margin:0;overflow:hidden}
+  body{font-family:"Segoe UI","Segoe UI Web",-apple-system,Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--canvas);font-size:12px}
+
+  .app{height:100vh;display:grid;grid-template-rows:44px 1fr;overflow:hidden}
+
+  /* App bar */
+  .appbar{display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--appbar);
+          border-bottom:1px solid var(--line);box-shadow:var(--shadow);z-index:5}
+  .appbar .mark{width:22px;height:22px;border-radius:4px;
+       background:linear-gradient(135deg,var(--gold),#eaa300);flex:0 0 auto;
+       display:flex;align-items:center;justify-content:center;font-weight:800;color:#3b2f00;font-size:12px}
+  .appbar h1{font-size:14px;font-weight:600;margin:0}
+  .appbar .sub{color:var(--muted);font-size:11px;margin-left:2px}
+  .appbar .spacer{flex:1}
+  .appbar .rec{font-size:11px;color:var(--muted)}
+  .appbar .rec b{color:var(--ink)}
+
+  .body{display:grid;grid-template-columns:196px 1fr;overflow:hidden}
+
+  /* Slicer rail */
+  .slicers{background:var(--tile);border-right:1px solid var(--line);padding:12px 12px;
+           display:flex;flex-direction:column;gap:14px;overflow:hidden}
+  .slicers .stitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+                   color:var(--muted);display:flex;align-items:center;gap:6px}
+  .slicer label{display:block;font-size:11px;color:var(--muted);margin:0 0 4px}
+  .slicer select{width:100%;background:#fff;color:var(--ink);border:1px solid #c8c6c4;
+                 border-radius:2px;padding:6px 8px;font-size:12px;font-family:inherit}
+  .slicer select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .reset{margin-top:2px;background:var(--accent);color:#fff;border:none;border-radius:2px;
+         padding:7px 10px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600}
+  .reset:hover{background:#0f7ede}
+  .caveat{margin-top:auto;font-size:10px;line-height:1.45;color:#8a5a00;background:#fff8e6;
+          border:1px solid #f5e2a8;border-radius:3px;padding:8px 9px}
+  .caveat b{color:#7a4f00}
+
+  /* Canvas */
+  .canvas{padding:10px;display:grid;grid-template-rows:auto 1fr;gap:10px;overflow:hidden;min-height:0}
+
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .kpi{background:var(--tile);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);
+       padding:8px 12px;position:relative;overflow:hidden}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
+  .kpi .v{font-size:22px;font-weight:700;line-height:1.15;letter-spacing:-.3px}
+  .kpi .l{font-size:10.5px;color:var(--muted);margin-top:1px;text-transform:uppercase;letter-spacing:.4px}
+
+  .tiles{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(2,1fr);
+         gap:10px;min-height:0}
+  .tile{background:var(--tile);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);
+        padding:8px 10px 6px;display:flex;flex-direction:column;min-width:0;min-height:0}
+  .tile h4{margin:0;font-size:12px;font-weight:600;color:var(--ink)}
+  .tile .cap{font-size:10px;color:var(--muted);margin:1px 0 5px}
+  .wrap{position:relative;flex:1;min-height:0;min-width:0}
+  .twin{display:flex;gap:6px;flex:1;min-height:0}
+  .twin .half{flex:1;min-width:0;display:flex;flex-direction:column}
+  .twin .half .hl{font-size:10px;color:var(--muted);text-align:center;margin-bottom:2px}
+  .twin .half .wrap{flex:1}
+
+  /* grid placement */
+  .t-risk   {grid-column:1 / span 3; grid-row:1 / span 2}
+  .t-skills {grid-column:4 / span 3; grid-row:1 / span 2}
+  .t-ind    {grid-column:7 / span 3; grid-row:1}
+  .t-sal    {grid-column:10 / span 3; grid-row:1}
+  .t-scatter{grid-column:7 / span 3; grid-row:2}
+  .t-mix    {grid-column:10 / span 3; grid-row:2}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
+<div class="app">
+
+  <div class="appbar">
+    <div class="mark">AI</div>
     <h1>AI's Impact on Jobs by 2030</h1>
-    <p>Interactive exploration of 3,000 simulated workforce records across 20 roles, 10 industries, and 10 countries.</p>
-  </header>
-
-  <div class="callout">
-    <b>Read this first:</b> formal hypothesis tests (ANOVA, chi-square, correlation) find
-    <b>no statistically significant relationship</b> between AI replacement risk and industry,
-    job title, salary, or experience in this dataset — the fields appear independently randomized.
-    Explore the patterns below, but treat them as artifacts of a synthetic dataset, not real
-    labor-market claims. Full write-up in the <a href="../README.md" style="color:#8fc5ea">README</a>.
+    <span class="sub">· Workforce Report</span>
+    <div class="spacer"></div>
+    <span class="rec" id="rec"></span>
   </div>
 
-  <div class="cards" id="cards"></div>
+  <div class="body">
 
-  <div class="filters">
-    <div class="f">
-      <label for="fIndustry">Industry</label>
-      <select id="fIndustry"><option value="">All industries</option></select>
-    </div>
-    <div class="f">
-      <label for="fCountry">Country</label>
-      <select id="fCountry"><option value="">All countries</option></select>
-    </div>
-    <div class="f">
-      <label for="fEdu">Education</label>
-      <select id="fEdu"><option value="">All education</option></select>
-    </div>
-    <button class="reset" id="reset">Reset filters</button>
-    <span class="count" id="count"></span>
+    <aside class="slicers">
+      <div class="stitle">▼ Filters</div>
+      <div class="slicer"><label for="fIndustry">Industry</label>
+        <select id="fIndustry"><option value="">All industries</option></select></div>
+      <div class="slicer"><label for="fCountry">Country</label>
+        <select id="fCountry"><option value="">All countries</option></select></div>
+      <div class="slicer"><label for="fEdu">Education</label>
+        <select id="fEdu"><option value="">All education</option></select></div>
+      <button class="reset" id="reset">Clear filters</button>
+      <div class="caveat"><b>⚠ Synthetic dataset.</b> Statistical tests (ANOVA, chi-square,
+        correlation) found no significant link between AI risk and industry, role, salary, or
+        experience. Patterns shown are exploratory only — see README.</div>
+    </aside>
+
+    <main class="canvas">
+      <div class="kpis" id="kpis"></div>
+
+      <div class="tiles">
+        <div class="tile t-risk">
+          <h4>AI Replacement Risk by Job Title</h4>
+          <div class="cap">Mean risk (0–1) · dashed line = selection average</div>
+          <div class="wrap"><canvas id="riskJob"></canvas></div>
+        </div>
+        <div class="tile t-skills">
+          <h4>Top Required Skills</h4>
+          <div class="cap">Mentions across all listings (unfiltered)</div>
+          <div class="wrap"><canvas id="skills"></canvas></div>
+        </div>
+        <div class="tile t-ind">
+          <h4>Risk by Industry</h4>
+          <div class="cap">Mean AI replacement risk</div>
+          <div class="wrap"><canvas id="riskIndustry"></canvas></div>
+        </div>
+        <div class="tile t-sal">
+          <h4>Average Salary by Country</h4>
+          <div class="cap">Mean annual salary (USD)</div>
+          <div class="wrap"><canvas id="salaryCountry"></canvas></div>
+        </div>
+        <div class="tile t-scatter">
+          <h4>Risk vs. Future Demand</h4>
+          <div class="cap">Per job title · bubble = record count</div>
+          <div class="wrap"><canvas id="scatter"></canvas></div>
+        </div>
+        <div class="tile t-mix">
+          <h4>Workforce Mix</h4>
+          <div class="cap">Share of roles</div>
+          <div class="twin">
+            <div class="half"><div class="hl">Hiring Trend</div><div class="wrap"><canvas id="hiring"></canvas></div></div>
+            <div class="half"><div class="hl">Remote Work</div><div class="wrap"><canvas id="remote"></canvas></div></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
   </div>
-
-  <div class="grid">
-    <div class="chart tall span2">
-      <h3>Average AI Replacement Risk by Job Title</h3>
-      <p>Mean risk score (0–1). Dashed line marks the overall average across the current selection.</p>
-      <canvas id="riskJob"></canvas>
-    </div>
-    <div class="chart">
-      <h3>AI Replacement Risk by Industry</h3>
-      <p>Mean risk score per industry.</p>
-      <canvas id="riskIndustry"></canvas>
-    </div>
-    <div class="chart">
-      <h3>Average Salary by Country</h3>
-      <p>Mean annual salary (USD).</p>
-      <canvas id="salaryCountry"></canvas>
-    </div>
-    <div class="chart">
-      <h3>Hiring Trend (2026)</h3>
-      <p>Share of roles by projected hiring direction.</p>
-      <canvas id="hiring"></canvas>
-    </div>
-    <div class="chart">
-      <h3>Remote Work Possibility</h3>
-      <p>Share of roles by work arrangement.</p>
-      <canvas id="remote"></canvas>
-    </div>
-    <div class="chart span2">
-      <h3>Risk vs. Future Demand by Job Title</h3>
-      <p>Each point is a job title in the current selection: x = mean AI replacement risk, y = mean future demand score. Bubble size = number of records.</p>
-      <canvas id="scatter"></canvas>
-    </div>
-    <div class="chart span2">
-      <h3>Top 15 Required Skills</h3>
-      <p>Global mention counts across all 3,000 listings (not affected by filters).</p>
-      <canvas id="skills"></canvas>
-    </div>
-  </div>
-
-  <footer>
-    Built with pandas, scipy &amp; Chart.js · Part of the
-    <a href="../README.md">AI Impact on Jobs 2030</a> portfolio project.<br>
-    Dataset is synthetic; see README for the statistical validation that motivates the caveat above.
-  </footer>
 </div>
 
 <script src="data.js"></script>
 <script>
-const PALETTE = ['#4aa3df','#c0504d','#4caf7d','#e0a54a','#8e6fd8','#5bc0be','#d9635b','#7ea6e0','#c9a227','#59a14f'];
-Chart.defaults.color = '#93a4b3';
-Chart.defaults.borderColor = '#2b3d4d';
-Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+Chart.defaults.color = '#605e5c';
+Chart.defaults.borderColor = '#edebe9';
+Chart.defaults.font.family = '"Segoe UI",-apple-system,Roboto,Helvetica,Arial,sans-serif';
+Chart.defaults.font.size = 10;
 Chart.defaults.animation = false;
 
+const PB = ['#118DFF','#12239E','#E66C37','#6B007B','#E044A7','#744EC2','#D9B300','#D64550','#197278','#1AAB40'];
 const $ = id => document.getElementById(id);
 const uniq = k => [...new Set(RECORDS.map(r => r[k]))].sort();
 const mean = a => a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
@@ -149,133 +181,110 @@ function currentData(){
   return RECORDS.filter(r =>
     (!i || r.Industry===i) && (!c || r.Country===c) && (!e || r.Education_Level===e));
 }
-
 function groupMean(data, key, val){
   const m={};
   data.forEach(r => { (m[r[key]] ??= []).push(r[val]); });
   return Object.entries(m).map(([k,v]) => [k, mean(v), v.length]);
 }
-
 function countBy(data, key){
-  const m={};
-  data.forEach(r => { m[r[key]]=(m[r[key]]||0)+1; });
-  return m;
+  const m={}; data.forEach(r => { m[r[key]]=(m[r[key]]||0)+1; }); return m;
 }
 
-const charts = {};
-function render(){
-  const data = currentData();
-  $('count').textContent = data.length.toLocaleString() + ' of ' + RECORDS.length.toLocaleString() + ' records';
-
-  // stat cards
-  const avgRisk = mean(data.map(r=>r.AI_Replacement_Risk));
-  const avgSal  = mean(data.map(r=>r.Average_Salary_USD));
-  const avgDem  = mean(data.map(r=>r.Future_Demand_Score));
-  const growing = data.filter(r=>r.Hiring_Trend_2026==='Growing').length;
-  const cards = [
-    ['Records', data.length.toLocaleString()],
-    ['Avg AI risk', avgRisk.toFixed(2)],
-    ['Avg salary', '$'+Math.round(avgSal).toLocaleString()],
-    ['Avg future demand', avgDem.toFixed(2)],
-    ['% "Growing" hiring', data.length? Math.round(100*growing/data.length)+'%':'—'],
-  ];
-  $('cards').innerHTML = cards.map(([l,v])=>`<div class="card"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
-
-  // risk by job title (sorted desc)
-  const rj = groupMean(data,'Job_Title','AI_Replacement_Risk').sort((a,b)=>b[1]-a[1]);
-  drawBar('riskJob', rj.map(x=>x[0]), rj.map(x=>x[1]), '#c0504d', 'y', avgRisk, [0,0.8]);
-
-  // risk by industry
-  const ri = groupMean(data,'Industry','AI_Replacement_Risk').sort((a,b)=>b[1]-a[1]);
-  drawBar('riskIndustry', ri.map(x=>x[0]), ri.map(x=>x[1]), '#4aa3df', 'y', null, [0,0.8]);
-
-  // salary by country
-  const sc = groupMean(data,'Country','Average_Salary_USD').sort((a,b)=>b[1]-a[1]);
-  drawBar('salaryCountry', sc.map(x=>x[0]), sc.map(x=>Math.round(x[1])), '#4caf7d', 'y', null, null, true);
-
-  // hiring donut
-  drawDonut('hiring', countBy(data,'Hiring_Trend_2026'), {Declining:'#d9635b',Stable:'#e0a54a',Growing:'#4caf7d'});
-
-  // remote donut
-  drawDonut('remote', countBy(data,'Remote_Work_Possibility'), {No:'#d9635b',Hybrid:'#e0a54a',Yes:'#4caf7d'});
-
-  // scatter risk vs demand
-  drawScatter('scatter', data);
-
-  // skills (global, once)
-  if(!charts.skills) drawSkills();
-}
-
-function baseOpts(indexAxis, meanLine, xRange, isMoney){
-  const o = {
-    indexAxis, responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false}, tooltip:{callbacks:{}}},
-    scales:{}
-  };
-  const valScale = indexAxis==='y' ? 'x' : 'y';
-  o.scales[valScale] = {beginAtZero:true};
-  if(xRange) o.scales[valScale].max = xRange[1];
-  if(isMoney) o.scales[valScale].ticks = {callback:v=>'$'+(v/1000)+'k'};
-  if(meanLine!=null){
-    o.plugins.annotationMean = meanLine; // custom, drawn via plugin below
-  }
-  return o;
-}
-
+// dashed constant line for the mean (Power BI "constant line")
 const meanLinePlugin = {
   id:'meanLine',
-  afterDraw(chart){
+  afterDatasetsDraw(chart){
     const m = chart.options.plugins.annotationMean;
     if(m==null) return;
     const {ctx, scales:{x}, chartArea:{top,bottom}} = chart;
     const px = x.getPixelForValue(m);
-    ctx.save();
-    ctx.strokeStyle='#e7eef5'; ctx.setLineDash([5,4]); ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(px,top); ctx.lineTo(px,bottom); ctx.stroke();
-    ctx.restore();
+    ctx.save(); ctx.strokeStyle='#605e5c'; ctx.setLineDash([4,3]); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(px,top); ctx.lineTo(px,bottom); ctx.stroke(); ctx.restore();
   }
 };
 Chart.register(meanLinePlugin);
 
-function drawBar(id, labels, values, color, indexAxis, meanLine, xRange, isMoney){
-  const o = baseOpts(indexAxis, meanLine, xRange, isMoney);
+const charts = {};
+
+function hbarOpts(meanLine, xMax, isMoney){
+  const o = {indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    layout:{padding:{right:6}},
+    plugins:{legend:{display:false}, annotationMean:meanLine ?? null,
+      tooltip:{callbacks:{label:c=> isMoney ? '$'+c.parsed.x.toLocaleString()
+                                            : c.parsed.x.toFixed(3)}}},
+    scales:{x:{beginAtZero:true, grid:{color:'#f2f0ee'},
+               ticks:isMoney?{callback:v=>'$'+(v/1000)+'k'}:{}},
+            y:{grid:{display:false}, ticks:{autoSkip:false,font:{size:9}}}}};
+  if(xMax) o.scales.x.max = xMax;
+  return o;
+}
+
+function drawHBar(id, rows, color, meanLine, xMax, isMoney){
+  const labels = rows.map(r=>r[0]), values = rows.map(r=>r[1]);
   if(charts[id]){ charts[id].data.labels=labels; charts[id].data.datasets[0].data=values;
-    charts[id].options.plugins.annotationMean=meanLine; charts[id].update(); return; }
+    charts[id].options.plugins.annotationMean=meanLine??null; charts[id].update(); return; }
   charts[id] = new Chart($(id), {type:'bar',
-    data:{labels,datasets:[{data:values,backgroundColor:color,borderRadius:3}]}, options:o});
+    data:{labels,datasets:[{data:values,backgroundColor:color,borderRadius:2,barPercentage:.86,categoryPercentage:.9}]},
+    options:hbarOpts(meanLine,xMax,isMoney)});
 }
 
 function drawDonut(id, counts, colorMap){
-  const labels = Object.keys(counts);
-  const values = labels.map(l=>counts[l]);
-  const colors = labels.map(l=>colorMap[l]||'#7ea6e0');
+  const labels = Object.keys(counts), values = labels.map(l=>counts[l]);
+  const colors = labels.map(l=>colorMap[l]||'#8a8886');
   if(charts[id]){ charts[id].data.labels=labels; charts[id].data.datasets[0].data=values;
     charts[id].data.datasets[0].backgroundColor=colors; charts[id].update(); return; }
   charts[id] = new Chart($(id), {type:'doughnut',
-    data:{labels,datasets:[{data:values,backgroundColor:colors,borderColor:'#182430',borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
-      plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}}}});
+    data:{labels,datasets:[{data:values,backgroundColor:colors,borderColor:'#fff',borderWidth:1.5}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',
+      plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9},padding:6}}}}});
 }
 
 function drawScatter(id, data){
-  const rj = {};
-  data.forEach(r => { (rj[r.Job_Title] ??= {risk:[],dem:[]}); rj[r.Job_Title].risk.push(r.AI_Replacement_Risk); rj[r.Job_Title].dem.push(r.Future_Demand_Score); });
-  const pts = Object.entries(rj).map(([job,v])=>({x:mean(v.risk),y:mean(v.dem),r:Math.max(5,Math.sqrt(v.risk.length)*2),job}));
-  const o = {responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw.job}: risk ${c.raw.x.toFixed(2)}, demand ${c.raw.y.toFixed(2)}`}}},
-    scales:{x:{title:{display:true,text:'Mean AI replacement risk'}},
-            y:{title:{display:true,text:'Mean future demand'}}}};
+  const g = {};
+  data.forEach(r => { (g[r.Job_Title] ??= {risk:[],dem:[]}); g[r.Job_Title].risk.push(r.AI_Replacement_Risk); g[r.Job_Title].dem.push(r.Future_Demand_Score); });
+  const pts = Object.entries(g).map(([job,v])=>({x:mean(v.risk),y:mean(v.dem),r:Math.max(4,Math.sqrt(v.risk.length)*1.7),job}));
   if(charts[id]){ charts[id].data.datasets[0].data=pts; charts[id].update(); return; }
   charts[id] = new Chart($(id), {type:'bubble',
-    data:{datasets:[{data:pts,backgroundColor:'rgba(74,163,223,.55)',borderColor:'#4aa3df'}]}, options:o});
+    data:{datasets:[{data:pts,backgroundColor:'rgba(17,141,255,.5)',borderColor:'#118DFF',borderWidth:1}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${c.raw.job}: risk ${c.raw.x.toFixed(2)}, demand ${c.raw.y.toFixed(2)}`}}},
+      scales:{x:{grid:{color:'#f2f0ee'},title:{display:true,text:'Mean AI risk',font:{size:9}},ticks:{font:{size:9}}},
+              y:{grid:{color:'#f2f0ee'},title:{display:true,text:'Future demand',font:{size:9}},ticks:{font:{size:9}}}}}});
 }
 
-function drawSkills(){
-  const top = Object.entries(SKILLS).slice(0,15);
-  charts.skills = new Chart($('skills'), {type:'bar',
-    data:{labels:top.map(x=>x[0]),datasets:[{data:top.map(x=>x[1]),backgroundColor:'#8e6fd8',borderRadius:3}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+function render(){
+  const data = currentData();
+  $('rec').innerHTML = `<b>${data.length.toLocaleString()}</b> of ${RECORDS.length.toLocaleString()} records`;
+
+  const avgRisk = mean(data.map(r=>r.AI_Replacement_Risk));
+  const avgSal  = mean(data.map(r=>r.Average_Salary_USD));
+  const avgDem  = mean(data.map(r=>r.Future_Demand_Score));
+  const avgGrow = mean(data.map(r=>r.Job_Growth_2030));
+  const growing = data.filter(r=>r.Hiring_Trend_2026==='Growing').length;
+  const kpis = [
+    ['Records', data.length.toLocaleString()],
+    ['Avg AI Risk', avgRisk.toFixed(2)],
+    ['Avg Salary', '$'+Math.round(avgSal/1000)+'k'],
+    ['Avg Demand', avgDem.toFixed(2)],
+    ['Growing Hiring', data.length? Math.round(100*growing/data.length)+'%':'—'],
+  ];
+  $('kpis').innerHTML = kpis.map(([l,v])=>`<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+
+  drawHBar('riskJob', groupMean(data,'Job_Title','AI_Replacement_Risk').sort((a,b)=>b[1]-a[1]),
+           '#118DFF', avgRisk, 0.8);
+  drawHBar('riskIndustry', groupMean(data,'Industry','AI_Replacement_Risk').sort((a,b)=>b[1]-a[1]),
+           '#12239E', null, 0.8);
+  drawHBar('salaryCountry', groupMean(data,'Country','Average_Salary_USD').sort((a,b)=>b[1]-a[1])
+             .map(r=>[r[0],Math.round(r[1])]), '#E66C37', null, null, true);
+  drawDonut('hiring', countBy(data,'Hiring_Trend_2026'), {Declining:'#D64550',Stable:'#D9B300',Growing:'#1AAB40'});
+  drawDonut('remote', countBy(data,'Remote_Work_Possibility'), {No:'#D64550',Hybrid:'#D9B300',Yes:'#1AAB40'});
+  drawScatter('scatter', data);
+
+  if(!charts.skills){
+    const top = Object.entries(SKILLS).slice(0,12).map(([k,v])=>[k,v]);
+    drawHBar('skills', top, '#744EC2');
+  }
 }
 
 ['fIndustry','fCountry','fEdu'].forEach(id => $(id).addEventListener('change', render));
