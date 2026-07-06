@@ -5,7 +5,7 @@ countries, AI replacement risk, future demand, salary, and work-arrangement tren
 plus formal hypothesis testing to check whether the patterns that show up in the charts
 are statistically real or just noise.
 
-**[Open the full notebook →](notebooks/analysis.ipynb)** · **[Interactive dashboard →](dashboard/index.html)**
+**[Open the full notebook →](notebooks/analysis.ipynb)** · **[Interactive dashboard (live) →](https://hashtro9-rgb.github.io/Ai-Jobs-2030-Analysis/dashboard/)**
 
 ## Why this project is different
 
