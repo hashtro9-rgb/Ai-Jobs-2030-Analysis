@@ -5,7 +5,7 @@ countries, AI replacement risk, future demand, salary, and work-arrangement tren
 plus formal hypothesis testing to check whether the patterns that show up in the charts
 are statistically real or just noise.
 
-**[Open the full notebook →](notebooks/analysis.ipynb)**
+**[Open the full notebook →](notebooks/analysis.ipynb)** · **[Interactive dashboard →](dashboard/index.html)**
 
 ## Why this project is different
 
@@ -72,9 +72,28 @@ mix) are in the [notebook](notebooks/analysis.ipynb) and the [`charts/`](charts/
 ├── notebooks/
 │   ├── analysis.ipynb                 # main analysis, executed with outputs
 │   └── build_notebook.py              # script that generates analysis.ipynb from scratch
+├── dashboard/
+│   ├── index.html                     # self-contained interactive dashboard (Chart.js)
+│   └── data.js                        # pre-processed data + skill aggregates
 ├── charts/                            # all figures exported as standalone PNGs
 ├── requirements.txt
 └── README.md
+```
+
+## Interactive dashboard
+
+[`dashboard/index.html`](dashboard/index.html) is a self-contained page (Chart.js via CDN,
+data embedded in `data.js`) with stat cards, filters by industry / country / education, and
+live-updating charts for risk by job title, risk by industry, salary by country, hiring and
+remote-work mix, a risk-vs-demand bubble chart, and top skills.
+
+**Host it free on GitHub Pages:** push this repo, then in the repo's
+*Settings → Pages* set the source to the `main` branch (root). The dashboard will be live at
+`https://<your-username>.github.io/<repo-name>/dashboard/`. To preview locally instead:
+
+```bash
+python -m http.server 8000 --directory dashboard
+# then open http://localhost:8000
 ```
 
 ## Reproducing this analysis
