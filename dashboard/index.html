@@ -7,16 +7,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --canvas:#f3f2f1;      /* Power BI report canvas gray */
-    --tile:#ffffff;
-    --line:#e1dfdd;
-    --ink:#252423;
-    --muted:#605e5c;
-    --appbar:#faf9f8;
+    --canvas:#000000;      /* black report canvas */
+    --tile:#141414;
+    --line:#2b2b2b;
+    --ink:#f3f2f1;
+    --muted:#a6a4a2;
+    --appbar:#0a0a0a;
     --accent:#118DFF;      /* Power BI default data color 1 */
     --accent2:#12239E;
     --gold:#F2C811;        /* Power BI yellow */
-    --shadow:0 1.6px 3.6px rgba(0,0,0,.08),0 .3px .9px rgba(0,0,0,.06);
+    --shadow:0 1.6px 3.6px rgba(0,0,0,.5),0 .3px .9px rgba(0,0,0,.4);
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;overflow:hidden}
@@ -45,15 +45,15 @@
   .slicers .stitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
                    color:var(--muted);display:flex;align-items:center;gap:6px}
   .slicer label{display:block;font-size:11px;color:var(--muted);margin:0 0 4px}
-  .slicer select{width:100%;background:#fff;color:var(--ink);border:1px solid #c8c6c4;
+  .slicer select{width:100%;background:#1e1e1e;color:var(--ink);border:1px solid #3a3a3a;
                  border-radius:2px;padding:6px 8px;font-size:12px;font-family:inherit}
   .slicer select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
   .reset{margin-top:2px;background:var(--accent);color:#fff;border:none;border-radius:2px;
          padding:7px 10px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600}
   .reset:hover{background:#0f7ede}
-  .caveat{margin-top:auto;font-size:10px;line-height:1.45;color:#8a5a00;background:#fff8e6;
-          border:1px solid #f5e2a8;border-radius:3px;padding:8px 9px}
-  .caveat b{color:#7a4f00}
+  .caveat{margin-top:auto;font-size:10px;line-height:1.45;color:#e8c46a;background:#2a2308;
+          border:1px solid #4a3d10;border-radius:3px;padding:8px 9px}
+  .caveat b{color:#f2c811}
 
   /* Canvas */
   .canvas{padding:10px;display:grid;grid-template-rows:auto 1fr;gap:10px;overflow:hidden;min-height:0}
@@ -158,8 +158,8 @@
 
 <script src="data.js"></script>
 <script>
-Chart.defaults.color = '#605e5c';
-Chart.defaults.borderColor = '#edebe9';
+Chart.defaults.color = '#a6a4a2';
+Chart.defaults.borderColor = '#2b2b2b';
 Chart.defaults.font.family = '"Segoe UI",-apple-system,Roboto,Helvetica,Arial,sans-serif';
 Chart.defaults.font.size = 10;
 Chart.defaults.animation = false;
@@ -198,7 +198,7 @@ const meanLinePlugin = {
     if(m==null) return;
     const {ctx, scales:{x}, chartArea:{top,bottom}} = chart;
     const px = x.getPixelForValue(m);
-    ctx.save(); ctx.strokeStyle='#605e5c'; ctx.setLineDash([4,3]); ctx.lineWidth=1;
+    ctx.save(); ctx.strokeStyle='#d0cecc'; ctx.setLineDash([4,3]); ctx.lineWidth=1;
     ctx.beginPath(); ctx.moveTo(px,top); ctx.lineTo(px,bottom); ctx.stroke(); ctx.restore();
   }
 };
@@ -212,7 +212,7 @@ function hbarOpts(meanLine, xMax, isMoney){
     plugins:{legend:{display:false}, annotationMean:meanLine ?? null,
       tooltip:{callbacks:{label:c=> isMoney ? '$'+c.parsed.x.toLocaleString()
                                             : c.parsed.x.toFixed(3)}}},
-    scales:{x:{beginAtZero:true, grid:{color:'#f2f0ee'},
+    scales:{x:{beginAtZero:true, grid:{color:'#242424'},
                ticks:isMoney?{callback:v=>'$'+(v/1000)+'k'}:{}},
             y:{grid:{display:false}, ticks:{autoSkip:false,font:{size:9}}}}};
   if(xMax) o.scales.x.max = xMax;
@@ -234,7 +234,7 @@ function drawDonut(id, counts, colorMap){
   if(charts[id]){ charts[id].data.labels=labels; charts[id].data.datasets[0].data=values;
     charts[id].data.datasets[0].backgroundColor=colors; charts[id].update(); return; }
   charts[id] = new Chart($(id), {type:'doughnut',
-    data:{labels,datasets:[{data:values,backgroundColor:colors,borderColor:'#fff',borderWidth:1.5}]},
+    data:{labels,datasets:[{data:values,backgroundColor:colors,borderColor:'#141414',borderWidth:1.5}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',
       plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9},padding:6}}}}});
 }
@@ -249,8 +249,8 @@ function drawScatter(id, data){
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>`${c.raw.job}: risk ${c.raw.x.toFixed(2)}, demand ${c.raw.y.toFixed(2)}`}}},
-      scales:{x:{grid:{color:'#f2f0ee'},title:{display:true,text:'Mean AI risk',font:{size:9}},ticks:{font:{size:9}}},
-              y:{grid:{color:'#f2f0ee'},title:{display:true,text:'Future demand',font:{size:9}},ticks:{font:{size:9}}}}}});
+      scales:{x:{grid:{color:'#242424'},title:{display:true,text:'Mean AI risk',font:{size:9}},ticks:{font:{size:9}}},
+              y:{grid:{color:'#242424'},title:{display:true,text:'Future demand',font:{size:9}},ticks:{font:{size:9}}}}}});
 }
 
 function render(){
